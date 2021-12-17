@@ -9,13 +9,17 @@ probe_file(PyObject *self, PyObject *args)
 {
     const char *filename;
     mp3dec_ex_t dec;
+    int err;
     PyObject *result;
 
     if (!PyArg_ParseTuple(args, "s", &filename))
     {
         return NULL;
     }
-    if (mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE))
+    Py_BEGIN_ALLOW_THREADS
+    err = mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE);
+    Py_END_ALLOW_THREADS
+    if (err)
     {
         // possibly use different exception type,
         // see https://docs.python.org/3/extending/extending.html#intermezzo-errors-and-exceptions
@@ -36,6 +40,7 @@ probe_buffer(PyObject *self, PyObject *args)
     PyObject *inobj;
     Py_buffer in;
     mp3dec_ex_t dec;
+    int err;
     PyObject *result;
 
     if (!PyArg_ParseTuple(args, "O", &inobj))
@@ -46,7 +51,10 @@ probe_buffer(PyObject *self, PyObject *args)
     {
         return NULL;
     }
-    if (mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE))
+    Py_BEGIN_ALLOW_THREADS
+    err = mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE);
+    Py_END_ALLOW_THREADS
+    if (err)
     {
         PyErr_SetString(PyExc_RuntimeError, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
@@ -69,6 +77,7 @@ read_file(PyObject *self, PyObject *args)
     PyObject *outobj;
     Py_buffer out;
     mp3dec_ex_t dec;
+    int err;
     size_t max_read;
     size_t read;
     PyObject *result;
@@ -82,7 +91,10 @@ read_file(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN))
+    Py_BEGIN_ALLOW_THREADS
+    err = mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN);
+    Py_END_ALLOW_THREADS
+    if (err)
     {
         PyErr_SetString(PyExc_RuntimeError, "File could not be opened or understood");
         PyBuffer_Release(&out);
@@ -91,7 +103,10 @@ read_file(PyObject *self, PyObject *args)
 
     if (start)
     {
-        if (mp3dec_ex_seek(&dec, start * dec.info.channels))
+        Py_BEGIN_ALLOW_THREADS
+        err = mp3dec_ex_seek(&dec, start * dec.info.channels);
+        Py_END_ALLOW_THREADS
+        if (err)
         {
             PyErr_SetString(PyExc_RuntimeError, "Could not seek to start position");
             PyBuffer_Release(&out);
@@ -108,7 +123,9 @@ read_file(PyObject *self, PyObject *args)
             max_read = length * dec.info.channels;
         }
     }
+    Py_BEGIN_ALLOW_THREADS
     read = mp3dec_ex_read(&dec, out.buf, max_read);
+    Py_END_ALLOW_THREADS
     PyBuffer_Release(&out);
     if (read != max_read)
     {
@@ -137,6 +154,7 @@ read_buffer(PyObject *self, PyObject *args)
     PyObject *outobj;
     Py_buffer out;
     mp3dec_ex_t dec;
+    int err;
     size_t max_read;
     size_t read;
     PyObject *result;
@@ -155,7 +173,10 @@ read_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN))
+    Py_BEGIN_ALLOW_THREADS
+    err = mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN);
+    Py_END_ALLOW_THREADS
+    if (err)
     {
         PyErr_SetString(PyExc_RuntimeError, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
@@ -165,7 +186,10 @@ read_buffer(PyObject *self, PyObject *args)
 
     if (start)
     {
-        if (mp3dec_ex_seek(&dec, start * dec.info.channels))
+        Py_BEGIN_ALLOW_THREADS
+        err = mp3dec_ex_seek(&dec, start * dec.info.channels);
+        Py_END_ALLOW_THREADS
+        if (err)
         {
             PyErr_SetString(PyExc_RuntimeError, "Could not seek to start position");
             PyBuffer_Release(&in);
@@ -183,7 +207,9 @@ read_buffer(PyObject *self, PyObject *args)
             max_read = length * dec.info.channels;
         }
     }
+    Py_BEGIN_ALLOW_THREADS
     read = mp3dec_ex_read(&dec, out.buf, max_read);
+    Py_END_ALLOW_THREADS
     PyBuffer_Release(&out);
     if (read != max_read)
     {
