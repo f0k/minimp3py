@@ -6,14 +6,14 @@ from . import backend
 __all__ = ['probe', 'read']
 
 
-def probe(mp3: str):
+def probe(mp3: Any):
     """
     Returns information on an mp3 file.
 
     Parameters
     ----------
-    mp3: str
-        File name of the file to probe
+    mp3: str or bytes-like
+        File name of the file to probe, or buffer holding mp3 file data
 
     Returns
     -------
@@ -27,18 +27,18 @@ def probe(mp3: str):
     if isinstance(mp3, str):
         return backend.probe_file(mp3)
     else:
-        raise TypeError("mp3 must be str")
+        return backend.probe_buffer(mp3)
 
 
-def read(mp3: str, start: int=0, length: int=None,
+def read(mp3: Any, start: int=0, length: int=None,
          out: Any=None):
     """
     Reads floating-point samples from an mp3 file.
 
     Parameters
     ----------
-    mp3: str
-        File name of the file to read from
+    mp3: str or bytes-like
+        File name of the file to probe, or buffer holding mp3 file data
     start: int, optional
         Starting position in samples (default: start at beginning)
     length: int, optional
@@ -59,10 +59,10 @@ def read(mp3: str, start: int=0, length: int=None,
         out = np.empty((length or total_length, channels),
                        dtype=np.float32)
     if isinstance(mp3, str):
-        read, channels, sample_rate = backend.read_file(
-                mp3, start or 0, length or 0, out)
+        read_fn = backend.read_file
     else:
-        raise TypeError("mp3 must be str")
+        read_fn = backend.read_buffer
+    read, channels, sample_rate = read_fn(mp3, start or 0, length or 0, out)
     if read < len(out):
         out = out[:read]
     return out, sample_rate
