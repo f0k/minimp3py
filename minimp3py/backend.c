@@ -4,6 +4,8 @@
 #define MINIMP3_FLOAT_OUTPUT
 #include "minimp3_ex.h"
 
+static PyObject *Mp3Error;
+
 static PyObject *
 probe_file(PyObject *self, PyObject *args)
 {
@@ -21,9 +23,7 @@ probe_file(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
     if (err)
     {
-        // possibly use different exception type,
-        // see https://docs.python.org/3/extending/extending.html#intermezzo-errors-and-exceptions
-        PyErr_SetString(PyExc_RuntimeError, "File could not be opened or understood");
+        PyErr_SetString(Mp3Error, "File could not be opened or understood");
         return NULL;
     }
     result = PyTuple_Pack(3,
@@ -56,7 +56,7 @@ probe_buffer(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
     if (err)
     {
-        PyErr_SetString(PyExc_RuntimeError, "Buffer could not be read or understood");
+        PyErr_SetString(Mp3Error, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
         return NULL;
     }
@@ -96,7 +96,7 @@ read_file(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
     if (err)
     {
-        PyErr_SetString(PyExc_RuntimeError, "File could not be opened or understood");
+        PyErr_SetString(Mp3Error, "File could not be opened or understood");
         PyBuffer_Release(&out);
         return NULL;
     }
@@ -108,7 +108,7 @@ read_file(PyObject *self, PyObject *args)
         Py_END_ALLOW_THREADS
         if (err)
         {
-            PyErr_SetString(PyExc_RuntimeError, "Could not seek to start position");
+            PyErr_SetString(Mp3Error, "Could not seek to start position");
             PyBuffer_Release(&out);
             mp3dec_ex_close(&dec);
             return NULL;
@@ -131,7 +131,7 @@ read_file(PyObject *self, PyObject *args)
     {
         if (dec.last_error)
         {
-            PyErr_Format(PyExc_RuntimeError, "Decoding error %d", dec.last_error);
+            PyErr_Format(Mp3Error, "Decoding error %d", dec.last_error);
             mp3dec_ex_close(&dec);
             return NULL;
         }
@@ -178,7 +178,7 @@ read_buffer(PyObject *self, PyObject *args)
     Py_END_ALLOW_THREADS
     if (err)
     {
-        PyErr_SetString(PyExc_RuntimeError, "Buffer could not be read or understood");
+        PyErr_SetString(Mp3Error, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
         PyBuffer_Release(&out);
         return NULL;
@@ -191,7 +191,7 @@ read_buffer(PyObject *self, PyObject *args)
         Py_END_ALLOW_THREADS
         if (err)
         {
-            PyErr_SetString(PyExc_RuntimeError, "Could not seek to start position");
+            PyErr_SetString(Mp3Error, "Could not seek to start position");
             PyBuffer_Release(&in);
             PyBuffer_Release(&out);
             mp3dec_ex_close(&dec);
@@ -215,7 +215,7 @@ read_buffer(PyObject *self, PyObject *args)
     {
         if (dec.last_error)
         {
-            PyErr_Format(PyExc_RuntimeError, "Decoding error %d", dec.last_error);
+            PyErr_Format(Mp3Error, "Decoding error %d", dec.last_error);
             mp3dec_ex_close(&dec);
             PyBuffer_Release(&in);
             return NULL;
@@ -266,5 +266,22 @@ static struct PyModuleDef module = {
 PyMODINIT_FUNC
 PyInit_backend(void)
 {
-    return PyModule_Create(&module);
+    PyObject *m;
+    m = PyModule_Create(&module);
+    if (m == NULL)
+    {
+        return NULL;
+    }
+
+    Mp3Error = PyErr_NewExceptionWithDoc(
+        "backend.Mp3Error", "minimp3 reading or decoding error", NULL, NULL);
+    Py_XINCREF(Mp3Error);
+    if (PyModule_AddObject(m, "Mp3Error", Mp3Error) < 0) {
+        Py_XDECREF(Mp3Error);
+        Py_CLEAR(Mp3Error);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    return m;
 }

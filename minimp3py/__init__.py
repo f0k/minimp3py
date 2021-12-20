@@ -2,8 +2,9 @@
 from typing import Any
 
 from . import backend
+from .backend import Mp3Error
 
-__all__ = ['probe', 'read']
+__all__ = ['probe', 'read', 'Mp3Error']
 
 
 def probe(mp3: Any):

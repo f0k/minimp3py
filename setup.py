@@ -17,7 +17,7 @@ backend = Extension('minimp3py.backend',
                     include_dirs=['minimp3'])
 
 setup(name='minimp3py',
-      version='0.2.1',
+      version='0.2.2',
       description='Python binding to the minimp3 decoder',
       author='Jan Schlüter',
       author_email='github@jan-schlueter.de',
