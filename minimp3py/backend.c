@@ -21,7 +21,7 @@ probe_file(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS
     err = mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE);
     Py_END_ALLOW_THREADS
-    if (err)
+    if (err || !dec.info.channels || !dec.info.hz)
     {
         PyErr_SetString(Mp3Error, "File could not be opened or understood");
         return NULL;
@@ -54,7 +54,7 @@ probe_buffer(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS
     err = mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE);
     Py_END_ALLOW_THREADS
-    if (err)
+    if (err || !dec.info.channels || !dec.info.hz)
     {
         PyErr_SetString(Mp3Error, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
@@ -94,7 +94,7 @@ read_file(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS
     err = mp3dec_ex_open(&dec, filename, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN);
     Py_END_ALLOW_THREADS
-    if (err)
+    if (err || !dec.info.channels || !dec.info.hz)
     {
         PyErr_SetString(Mp3Error, "File could not be opened or understood");
         PyBuffer_Release(&out);
@@ -176,7 +176,7 @@ read_buffer(PyObject *self, PyObject *args)
     Py_BEGIN_ALLOW_THREADS
     err = mp3dec_ex_open_buf(&dec, in.buf, in.len, MP3D_SEEK_TO_SAMPLE | MP3D_DO_NOT_SCAN);
     Py_END_ALLOW_THREADS
-    if (err)
+    if (err || !dec.info.channels || !dec.info.hz)
     {
         PyErr_SetString(Mp3Error, "Buffer could not be read or understood");
         PyBuffer_Release(&in);
