@@ -57,7 +57,9 @@ def read(mp3: Any, start: int=0, length: int=None,
         # or change the backend to return the opened decoder state
         import numpy as np
         total_length, channels, _ = probe(mp3)
-        out = np.empty((length or total_length, channels),
+        available = max(0, total_length - (start or 0))
+        out = np.empty((min(available, length) if length else available,
+                        channels),
                        dtype=np.float32)
     if isinstance(mp3, str):
         read_fn = backend.read_file
