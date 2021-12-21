@@ -23,4 +23,5 @@ setup(name='minimp3py',
       author_email='github@jan-schlueter.de',
       ext_modules=[backend],
       packages=['minimp3py'],
+      extras_require={'test': ['pytest', 'numpy']},
       )
