@@ -138,7 +138,7 @@ read_file(PyObject *self, PyObject *args)
     }
 
     result = PyTuple_Pack(3,
-                          PyLong_FromLong(read),
+                          PyLong_FromLong(read / dec.info.channels),
                           PyLong_FromLong(dec.info.channels),
                           PyLong_FromLong(dec.info.hz));
     mp3dec_ex_close(&dec);
@@ -223,7 +223,7 @@ read_buffer(PyObject *self, PyObject *args)
     }
 
     result = PyTuple_Pack(3,
-                          PyLong_FromLong(read),
+                          PyLong_FromLong(read / dec.info.channels),
                           PyLong_FromLong(dec.info.channels),
                           PyLong_FromLong(dec.info.hz));
     mp3dec_ex_close(&dec);

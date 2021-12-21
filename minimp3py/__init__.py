@@ -64,6 +64,11 @@ def read(mp3: Any, start: int=0, length: int=None,
     else:
         read_fn = backend.read_buffer
     read, channels, sample_rate = read_fn(mp3, start or 0, length or 0, out)
-    if read < len(out):
-        out = out[:read]
+    # crop output if needed, agnostic to output type, dtype and shape
+    bytes_read = read * channels * 4
+    with memoryview(out) as m:
+        bytes_out = m.nbytes
+    if bytes_read < bytes_out:
+        bytes_per_item = bytes_out // len(out)
+        out = out[:bytes_read // bytes_per_item]
     return out, sample_rate
