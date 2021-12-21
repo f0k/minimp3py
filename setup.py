@@ -8,7 +8,7 @@ with SSE if your CPU supports it.
 """
 
 try:
-    from setuptools.core import setup, Extension
+    from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
 
