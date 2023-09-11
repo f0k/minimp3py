@@ -44,6 +44,16 @@ def f32_to_int16(pcm):
     return np.clip(pcm * 32768, -32767, 32768).astype(np.int16)
 
 
+def almost_same(pcm1, pcm2, max_diff=1, max_count=6):
+    """
+    Tells whether two int16 arrays differ by at most `max_diff` in at most
+    `max_count` samples. Required to cater for differences in SSE version.
+    """
+    diff = abs(pcm1 - pcm2)
+    return ((diff.max(initial=0) <= max_diff) and
+            (np.count_nonzero(diff) <= max_count))
+
+
 def test_probe(mp3, wav):
     """Tests whether minimp3py.probe() returns the correct information"""
     samples, channels, sample_rate = minimp3py.probe(mp3)
@@ -99,7 +109,7 @@ def test_read(mp3, wav, start, length, prealloc):
         # if we preallocated a non-numpy-array, convert it so we can compare it
         pcm = np.frombuffer(pcm, dtype=np.float32).reshape(ref_pcm.shape)
     assert pcm.shape == ref_pcm.shape
-    assert np.allclose(f32_to_int16(pcm), ref_pcm)
+    assert almost_same(f32_to_int16(pcm), ref_pcm)
 
 
 def test_read_shortbuffer(mp3, wav, start=1500, length=1000, out_length=500):
@@ -114,7 +124,7 @@ def test_read_shortbuffer(mp3, wav, start=1500, length=1000, out_length=500):
         assert pcm is out
     assert rate == ref_rate
     pcm = np.frombuffer(pcm, dtype=np.float32).reshape(ref_pcm.shape)
-    assert np.allclose(f32_to_int16(pcm), ref_pcm)
+    assert almost_same(f32_to_int16(pcm), ref_pcm)
 
 
 @pytest.fixture(params=["id3v2-only.mp3", "notexisting.mp3"])
