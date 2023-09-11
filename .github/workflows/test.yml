@@ -1,0 +1,52 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: true
+      matrix:
+        # Python 3.6 on all three OSs, later Python versions on Ubuntu
+        include:
+          - os: ubuntu-20.04
+            python-version: "3.6"
+          - os: macos-latest
+            python-version: "3.6"
+          - os: windows-latest
+            python-version: "3.6"
+          - os: ubuntu-latest
+            python-version: "3.7"
+          - os: ubuntu-latest
+            python-version: "3.8"
+          - os: ubuntu-latest
+            python-version: "3.9"
+          - os: ubuntu-latest
+            python-version: "3.10"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        python -m pip install .[test]
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --statistics
+    - name: Test with pytest
+      run: |
+        pytest

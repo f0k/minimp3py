@@ -31,8 +31,8 @@ def probe(mp3: Any):
         return backend.probe_buffer(mp3)
 
 
-def read(mp3: Any, start: int=0, length: int=None,
-         out: Any=None):
+def read(mp3: Any, start: int = 0, length: int = None,
+         out: Any = None):
     """
     Reads floating-point samples from an mp3 file.
 
