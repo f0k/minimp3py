@@ -39,7 +39,7 @@ def read(mp3: Any, start: int = 0, length: int = None,
     Parameters
     ----------
     mp3: str or bytes-like
-        File name of the file to probe, or buffer holding mp3 file data
+        File name of the file to read, or buffer holding mp3 file data
     start: int, optional
         Starting position in samples (default: start at beginning)
     length: int, optional
@@ -51,6 +51,8 @@ def read(mp3: Any, start: int = 0, length: int = None,
     -------
     samples: bytes-like or ndarray
         `out` or new ndarray of shape (length, channels) and dtype float32
+    sample_rate: int
+        sample rate of the returned samples in Hz
     """
     if out is None:
         # TODO: move this into backend to avoid opening the file twice,
