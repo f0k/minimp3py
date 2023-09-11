@@ -12,13 +12,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # Python 3.6 on all three OSs, later Python versions on Ubuntu
+        # Python 3.10 on all three OSs, other Python versions only on Ubuntu
         include:
-          - os: ubuntu-20.04
-            python-version: "3.6"
+          - os: ubuntu-latest
+            python-version: "3.10"
           - os: macos-latest
-            python-version: "3.6"
+            python-version: "3.10"
           - os: windows-latest
+            python-version: "3.10"
+          - os: ubuntu-20.04
             python-version: "3.6"
           - os: ubuntu-latest
             python-version: "3.7"
@@ -27,12 +29,12 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.9"
           - os: ubuntu-latest
-            python-version: "3.10"
+            python-version: "3.11"
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
